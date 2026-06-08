@@ -32,7 +32,7 @@ struct MistakeListView: View {
                         selectedSubject = subject
                     }
                     .buttonStyle(.bordered)
-                    .tint(selectedSubject == subject ? .tint : .gray)
+                    .tint(selectedSubject == subject ? Color.accentColor : Color.gray)
                     .controlSize(.small)
                 }
             }

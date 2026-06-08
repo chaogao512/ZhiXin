@@ -1,4 +1,5 @@
 import SwiftUI
+import UIKit
 
 struct SubjectSelectView: View {
     let images: [UIImage]
@@ -20,7 +21,7 @@ struct SubjectSelectView: View {
                         Text(subject)
                             .frame(maxWidth: .infinity)
                             .padding(.vertical, 12)
-                            .background(selectedSubject == subject ? Color.tint : Color.clear)
+                            .background(selectedSubject == subject ? Color.accentColor : Color.clear)
                             .foregroundStyle(selectedSubject == subject ? .white : .primary)
                             .clipShape(RoundedRectangle(cornerRadius: 10))
                             .overlay(

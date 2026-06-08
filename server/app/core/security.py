@@ -1,5 +1,6 @@
 from datetime import datetime, timedelta, timezone
 
+import bcrypt as _bcrypt
 import jwt
 
 from app.core.config import settings
@@ -34,6 +35,14 @@ def decode_token(token: str) -> dict | None:
         return jwt.decode(token, settings.SECRET_KEY, algorithms=[ALGORITHM])
     except jwt.PyJWTError:
         return None
+
+
+def hash_password(password: str) -> str:
+    return _bcrypt.hashpw(password.encode(), _bcrypt.gensalt()).decode()
+
+
+def verify_password(password: str, password_hash: str) -> bool:
+    return _bcrypt.checkpw(password.encode(), password_hash.encode())
 
 
 def get_current_user_id(token: str) -> str | None:

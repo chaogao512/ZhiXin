@@ -2,17 +2,25 @@ import SwiftUI
 
 @main
 struct ZhiXinApp: App {
-    @State private var authManager = AuthManager()
+    @State private var userManager = UserManager()
 
     var body: some Scene {
         WindowGroup {
             Group {
-                if authManager.isAuthenticated {
+                if userManager.hasCurrentSession {
                     MainTabView()
-                        .environment(authManager)
+                        .environment(userManager)
+                } else if userManager.savedAccounts.isEmpty {
+                    SetupView()
+                        .environment(userManager)
+                        .onAppear {
+                            if userManager.isSetup {
+                                userManager.restoreSession()
+                            }
+                        }
                 } else {
-                    AuthView()
-                        .environment(authManager)
+                    AccountPickerView()
+                        .environment(userManager)
                 }
             }
         }

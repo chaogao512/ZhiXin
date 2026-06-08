@@ -19,6 +19,8 @@ class User(Base):
 
     id = Column(String, primary_key=True, default=lambda: str(uuid.uuid4()))
     name = Column(String, nullable=False)
+    email = Column(String, unique=True, nullable=True)
+    password_hash = Column(String, nullable=True)
     role = Column(SAEnum(UserRole), nullable=False)
     oauth_provider = Column(String, nullable=False)
     oauth_id = Column(String, unique=True, nullable=False)

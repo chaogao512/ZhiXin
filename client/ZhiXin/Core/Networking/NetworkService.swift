@@ -5,7 +5,8 @@ enum APIError: LocalizedError {
     case noData
     case decodingError(Error)
     case serverError(String)
-    case unauthorized
+    case notFound
+    case notSetUp
 
     var errorDescription: String? {
         switch self {
@@ -13,7 +14,8 @@ enum APIError: LocalizedError {
         case .noData: return "无返回数据"
         case .decodingError(let e): return "数据解析失败: \(e.localizedDescription)"
         case .serverError(let m): return m
-        case .unauthorized: return "登录已过期，请重新登录"
+        case .notFound: return "资源不存在"
+        case .notSetUp: return "用户未设置"
         }
     }
 }
@@ -22,13 +24,10 @@ enum APIError: LocalizedError {
 final class NetworkService {
     static let shared = NetworkService()
 
-    var accessToken: String?
+    var userId: String?
+
     var baseURL: String {
-        #if targetEnvironment(simulator) || os(macOS)
-        return ProcessInfo.processInfo.environment["API_BASE_URL"] ?? "http://127.0.0.1:8000"
-        #else
-        return ProcessInfo.processInfo.environment["API_BASE_URL"] ?? "https://api.zhixin.app"
-        #endif
+        ProcessInfo.processInfo.environment["API_BASE_URL"] ?? "http://127.0.0.1:8000"
     }
 
     private let session: URLSession
@@ -45,8 +44,7 @@ final class NetworkService {
     func request<T: Decodable>(
         _ path: String,
         method: String = "GET",
-        body: Encodable? = nil,
-        auth: Bool = true
+        body: Encodable? = nil
     ) async throws -> T {
         guard let url = URL(string: "\(baseURL)/api/v1\(path)") else {
             throw APIError.invalidURL
@@ -56,8 +54,8 @@ final class NetworkService {
         req.httpMethod = method
         req.setValue("application/json", forHTTPHeaderField: "Content-Type")
 
-        if auth, let token = accessToken {
-            req.setValue("Bearer \(token)", forHTTPHeaderField: "Authorization")
+        if let id = userId {
+            req.setValue(id, forHTTPHeaderField: "X-User-Id")
         }
 
         if let body = body {
@@ -70,8 +68,8 @@ final class NetworkService {
             throw APIError.serverError("无效响应")
         }
 
-        if httpResponse.statusCode == 401 {
-            throw APIError.unauthorized
+        if httpResponse.statusCode == 404 {
+            throw APIError.notFound
         }
 
         if httpResponse.statusCode >= 400 {
@@ -84,13 +82,5 @@ final class NetworkService {
         } catch {
             throw APIError.decodingError(error)
         }
-    }
-
-    func requestNoBody<T: Decodable>(
-        _ path: String,
-        method: String = "GET",
-        auth: Bool = true
-    ) async throws -> T {
-        try await request(path, method: method, body: Optional<String>.none, auth: auth)
     }
 }

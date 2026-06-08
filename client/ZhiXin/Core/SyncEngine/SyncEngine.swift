@@ -11,9 +11,9 @@ final class SyncEngine {
     }
 
     func syncPendingMistakes() async throws {
-        let predicate = #Predicate<Mistake> { $0.syncStatus == .pending }
-        let descriptor = FetchDescriptor(predicate: predicate)
-        let pending = try modelContext.fetch(descriptor)
+        let descriptor = FetchDescriptor<Mistake>()
+        let all = try modelContext.fetch(descriptor)
+        let pending = all.filter { $0.syncStatus == .pending }
 
         for mistake in pending {
             mistake.syncStatus = .syncing
@@ -30,8 +30,17 @@ final class SyncEngine {
     }
 
     private func uploadMistake(_ mistake: Mistake) async throws {
-        let body = try JSONEncoder().encode(mistake)
-        let _: UploadResponse = try await networkService.request("/mistakes",
-            method: "POST", body: body)
+        let body = MistakeCreateBody(
+            subjectID: nil,
+            chapterID: nil,
+            studentAnswer: mistake.studentAnswer,
+            correctAnswer: mistake.correctAnswer,
+            ocrText: mistake.ocrText,
+            photoURLs: nil,
+            source: "manual"
+        )
+        let _: MistakeResponse = try await networkService.request(
+            "/mistakes", method: "POST", body: body
+        )
     }
 }

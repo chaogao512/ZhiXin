@@ -53,22 +53,23 @@ struct StatCard: View {
     let value: String
     let icon: String
     let color: Color
+    var compact: Bool = false
 
     var body: some View {
-        VStack(spacing: 8) {
+        VStack(spacing: compact ? 4 : 8) {
             Image(systemName: icon)
-                .font(.title2)
+                .font(compact ? .body : .title2)
                 .foregroundStyle(color)
             Text(value)
-                .font(.title2).bold()
+                .font(compact ? .headline : .title2).bold()
             Text(title)
-                .font(.caption)
+                .font(compact ? .caption2 : .caption)
                 .foregroundStyle(.secondary)
         }
-        .padding()
+        .padding(compact ? 8 : 16)
         .frame(maxWidth: .infinity)
         .background(.regularMaterial)
-        .clipShape(RoundedRectangle(cornerRadius: 16))
+        .clipShape(RoundedRectangle(cornerRadius: compact ? 10 : 16))
     }
 }
 

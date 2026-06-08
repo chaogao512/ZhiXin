@@ -1,10 +1,10 @@
 import SwiftUI
 
 struct MainTabView: View {
-    @Environment(AuthManager.self) private var authManager
+    @Environment(UserManager.self) private var userManager
 
     var body: some View {
-        switch authManager.currentUser?.userRole {
+        switch userManager.currentUser?.userRole {
         case .student:
             StudentTabView()
         case .parent:

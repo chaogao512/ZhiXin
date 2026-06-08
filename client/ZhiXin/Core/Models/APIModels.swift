@@ -1,9 +1,9 @@
 import Foundation
 
-struct LoginResponse: Codable {
-    let accessToken: String
-    let refreshToken: String
-    let user: UserInfo
+enum UserRole: String, Codable {
+    case student
+    case parent
+    case teacher
 }
 
 struct UserInfo: Codable {
@@ -11,6 +11,8 @@ struct UserInfo: Codable {
     let name: String
     let role: String
     let avatarURL: String?
+
+    var userRole: UserRole? { UserRole(rawValue: role) }
 
     enum CodingKeys: String, CodingKey {
         case id, name, role

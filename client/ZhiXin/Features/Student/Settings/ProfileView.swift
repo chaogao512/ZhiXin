@@ -1,25 +1,37 @@
 import SwiftUI
 
 struct ProfileView: View {
-    @Environment(AuthManager.self) private var authManager
+    @Environment(UserManager.self) private var userManager
     @State private var showJoinClass = false
     @State private var inviteCode = ""
     @State private var showBindParent = false
+    @State private var showConfirmLogout = false
 
     var body: some View {
         NavigationStack {
             List {
-                Section("账号信息") {
+                Section("个人信息") {
                     HStack {
-                        Image(systemName: "person.circle.fill")
-                            .font(.largeTitle)
-                            .foregroundStyle(.tint)
-                        VStack(alignment: .leading) {
-                            Text(authManager.currentUser?.name ?? "用户")
+                        ZStack {
+                            Circle()
+                                .fill(Color.accentColor.opacity(0.15))
+                                .frame(width: 52, height: 52)
+
+                            Text(String(userManager.currentUser?.name.prefix(1) ?? "用"))
+                                .font(.title2.weight(.semibold))
+                                .foregroundStyle(Color.accentColor)
+                        }
+
+                        VStack(alignment: .leading, spacing: 4) {
+                            Text(userManager.currentUser?.name ?? "用户")
                                 .font(.headline)
-                            Text(authManager.currentUser?.role ?? "")
-                                .font(.caption)
-                                .foregroundStyle(.secondary)
+
+                            HStack(spacing: 6) {
+                                roleBadge(userManager.currentUser?.role ?? "")
+                                Text("ID: " + userManager.userId.prefix(12) + "...")
+                                    .font(.caption2)
+                                    .foregroundStyle(.secondary)
+                            }
                         }
                     }
                 }
@@ -27,9 +39,6 @@ struct ProfileView: View {
                 Section("班级") {
                     Button(action: { showJoinClass = true }) {
                         Label("加入班级", systemImage: "person.badge.plus")
-                    }
-                    if !inviteCode.isEmpty {
-                        Text("已加入班级").foregroundStyle(.secondary)
                     }
                 }
 
@@ -46,13 +55,24 @@ struct ProfileView: View {
 
                 Section {
                     Button(role: .destructive) {
-                        authManager.logout()
+                        showConfirmLogout = true
                     } label: {
-                        Label("退出登录", systemImage: "rectangle.portrait.and.arrow.right")
+                        HStack {
+                            Spacer()
+                            Text("退出登录")
+                                .font(.body.weight(.medium))
+                            Spacer()
+                        }
                     }
                 }
             }
             .navigationTitle("我的")
+            .alert("退出登录", isPresented: $showConfirmLogout) {
+                Button("退出", role: .destructive) { userManager.logout() }
+                Button("取消", role: .cancel) {}
+            } message: {
+                Text("退出后可在账户列表重新选择此账户")
+            }
             .sheet(isPresented: $showJoinClass) {
                 NavigationStack {
                     VStack(spacing: 16) {
@@ -77,5 +97,23 @@ struct ProfileView: View {
                 }
             }
         }
+    }
+
+    private func roleBadge(_ role: String) -> some View {
+        let label: String
+        let color: Color
+        switch role {
+        case "student": label = "学生"; color = .orange
+        case "parent": label = "家长"; color = .blue
+        case "teacher": label = "教师"; color = .indigo
+        default: label = role; color = .gray
+        }
+        return Text(label)
+            .font(.caption2.weight(.medium))
+            .padding(.horizontal, 8)
+            .padding(.vertical, 2)
+            .background(color.opacity(0.12))
+            .foregroundStyle(color)
+            .clipShape(Capsule())
     }
 }

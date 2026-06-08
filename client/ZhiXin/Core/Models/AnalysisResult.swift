@@ -27,9 +27,3 @@ final class AnalysisResult {
         self.createdAt = Date()
     }
 }
-
-struct SimilarQuestion: Codable {
-    let question: String
-    let options: [String]
-    let correctAnswer: String
-}
