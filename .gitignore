@@ -17,6 +17,10 @@ build/
 # macOS
 .DS_Store
 
+# Database
+*.db
+*.sqlite3
+
 # IDE
 .idea/
 .vscode/
