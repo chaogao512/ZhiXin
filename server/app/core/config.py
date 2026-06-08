@@ -8,7 +8,7 @@ class Settings(BaseSettings):
     LLM_API_KEY: str = ""
     LLM_MODEL: str = "gpt-4o"
     OCR_API_KEY: str = ""
-    SECRET_KEY: str = "change-this-in-production"
+    SECRET_KEY: str = "zhixin-dev-secret-key-change-in-production!!"
 
     class Config:
         env_file = ".env"
